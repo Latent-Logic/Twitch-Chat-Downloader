@@ -79,6 +79,7 @@ class Message(object):
 
     def __init__(self, comment):
         self.user = comment['commenter']['displayName']
+        self.ts = parse8601(comment['createdAt'])
 
         if settings['badges']['enabled']:
             badge_ids = [badge['setID']

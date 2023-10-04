@@ -4,11 +4,12 @@ import io
 import os
 import re
 import textwrap
+import json
 
 from datetime import timedelta, datetime as dtt
 
 from .settings import settings
-from .twitch import Messages
+from .twitch import Messages, Message
 
 
 class Subtitle(object):
@@ -146,6 +147,29 @@ class SubtitlesIRC(Subtitle):
         ))
 
 
+class SubtitlesJSON(Subtitle):
+    def __init__(self, filename: str):
+        super(SubtitlesJSON, self).__init__(filename)
+        self.file.writelines(
+            ['{"messages": [\n']
+        )
+
+    @staticmethod
+    def ftime(ts: dtt):
+        return int(ts.timestamp() * 1000)
+
+    def add(self, comment: Message):
+        self.file.write(
+            json.dumps({"ts": self.ftime(comment.ts), "user": comment.user, "message": comment.message}) + ',\n'
+        )
+
+    def close(self):
+        # Backspace to overwrite the trailing `,` at the end of the final line
+        self.file.seek(self.file.seek(0, os.SEEK_END) - 2)
+        self.file.writelines('\n]}')
+        super(SubtitlesJSON, self).close()
+
+
 class SubtitleWriter:
     @staticmethod
     def clean_filename(string, valid_filename_regex=re.compile(r'(?u)[^-\w.()\[\]{}@%! ]')):
@@ -179,6 +203,9 @@ class SubtitleWriter:
 
             if ext == 'irc':
                 self.drivers.add(SubtitlesIRC(filename))
+
+            if ext == 'json':
+                self.drivers.add(SubtitlesJSON(filename))
 
     def add(self, comment):
         [driver.add(comment) for driver in self.drivers]
