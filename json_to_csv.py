@@ -20,8 +20,9 @@ BITS = re.compile(
 # "User1 played Modem for 150 Bits"
 SA = re.compile(r"^(?P<src>.*) played (?P<sound>.*) for (?P<amount>\d+) Bits$")
 # "User1 just tipped $13.37 LandhorseHeart LandhorseHeart LandhorseHeart"
+# "User2 just tipped $100.00 THANK YOU FOR THE BITS LandhorseHeart"
 TIP = re.compile(
-    r"^(?P<src>.*) just tipped \$(?P<amount>[\d.]+) LandhorseHeart LandhorseHeart LandhorseHeart$"
+    r"^(?P<src>.*) just tipped \$(?P<amount>[\d.]+) .*$"
 )
 
 
